@@ -1,29 +1,53 @@
 import cv2
-#from matplotlib import pyplot as plt
-import numpy as np 
- 
-#def mosaic(src, ratio=0.1):
-#    small = cv2.resize(src, None, fx=ratio, fy=ratio, interpolation=cv2.INTER_NEAREST)
-#    return cv2.resize(small, src.shape[:2][::-1], interpolation=cv2.INTER_NEAREST)
+import numpy as np
 
-img = cv2.imread('/home/igor-bond/Desktop/soccer.jpg')
-img2 = cv2.imread('/home/igor-bond/Pictures/insta.png')
-#img[1350:1550,580:800] = [255,0,0]
-#print(img.shape)
-#print(img.size)
-#print(img.dtype)
-#img[143:180,536:635] = mosaic(img[143:180,536:635])
-img,img2 =  cv2.resize(img,(512,512)),cv2.resize(img2,(512,512))
-#b,g,r = cv2.split(img)
-#img = cv2.merge((b,g,r))
-#img = cv2.add(img,img2) 
-img = cv2.addWeighted(img,.9,img2,.1,0)
-cv2.imshow('image',img)
-cv2.waitKey(0)
+drawing = False 
+color = (255,255,255)
+ix,iy = 0,0
+
+def nothing(x):
+    pass
+
+def draw_circle(event,x,y,flags,param):
+    global ix,iy,drawing,color
+
+    b = cv2.getTrackbarPos('B','image')
+    g = cv2.getTrackbarPos('G','image')
+    r = cv2.getTrackbarPos('R','image')
+    s = cv2.getTrackbarPos('Size','image')
+    i = cv2.getTrackbarPos(switch,'image')
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        drawing = True
+        ix,iy = x,y
+
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if i == 1:
+            b,g,r = 0,0,0
+        if drawing == True:
+            cv2.circle(img,(x,y),s,(b,g,r),-1)
+
+    elif event == cv2.EVENT_LBUTTONUP:
+        if i == 1:
+            b,g,r = 0,0,0
+        drawing = False
+        cv2.circle(img,(x,y),s,(b,g,r),-1)
+
+
+img = np.zeros((800,800,3),np.uint8)
+cv2.namedWindow('image')
+
+cv2.createTrackbar('B','image',0,255,nothing)
+cv2.createTrackbar('G','image',0,255,nothing)
+cv2.createTrackbar('R','image',0,255,nothing)
+cv2.createTrackbar('Size', 'image',1,30,nothing)
+cv2.setMouseCallback('image',draw_circle)
+switch = '0 : OFF \n1 : ON'
+cv2.createTrackbar(switch, 'image',0,1,nothing)
+
+while True: 
+    k = cv2.waitKey(1) & 0xFF
+    if k == ord('q'):
+        break
+    cv2.imshow('image',img)
 cv2.destroyAllWindows()
-
-#im_list = np.asarray(img)
-#plt.imshow(im_list)
-#plt.show()
-
-
